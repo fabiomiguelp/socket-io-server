@@ -10,9 +10,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.17.3",
     "@rodrigogs/mysql-events": "^0.6.0",
     "cors": "^2.8.5",
+    "express": "^4.17.3",
     "mysql": "^2.18.1",
     "mysqli": "^3.0.11",
     "socket.io": "^2.3.0"
