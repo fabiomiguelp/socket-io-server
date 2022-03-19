@@ -1,14 +1,29 @@
-const express = require('express');
-const http = require('http');
-
-const MySQLEvents = require('@rodrigogs/mysql-events');
-const app = express();
-const server = http.createServer(app);
-
-const socketIO = require('socket.io');
-const io = socketIO.listen(server);
+//----------------MYSQL IMPORTS------------------------//
 const {database} = require('./config/helpers');
 const mysql = require('mysql');
+const MySQLEvents = require('@rodrigogs/mysql-events');
+//-----------------------------------------------------//
+
+const app = require('express')();
+const server = require('http').createServer(app);
+const io = require('socket.io')(server,
+    {
+        cors: {
+          origin: "http://localhost:3000"
+        }
+      });
+io.on('connection', (socket) => { 
+    console.log('user connected:' + socket.id);
+    socket.on('disconnect', function() {
+        console.log('user disconnected: '+socket.id);
+      });
+});
+
+
+server.listen(4001);
+
+
+
 
 let data = Array(0);
 let currentData = Array(0);
@@ -47,7 +62,7 @@ const program = async () => {
                 // If product is present, index will be gt -1
                 if (index > -1) {
                     data = data.filter(p => p.id !== newData.id);
-                    //io.sockets.emit('delete', {prods: [...data]});
+                    io.sockets.emit('delete', data);
                     console.log([...data]);
                 } else {
                     return;
@@ -63,7 +78,7 @@ const program = async () => {
                 // If product is present, index will be gt -1
                 if (index2 > -1) {
                     data[index2] = newData;
-                    //io.sockets.emit('update', {prods: [...data]});
+                    io.sockets.emit('update', data);
                     console.log([...data]);
                 } else {
                     return;
@@ -77,8 +92,8 @@ const program = async () => {
                     .getAll()
                     .then(prods => {
                         data = prods;
-                        //io.sockets.emit('insert', {prods: [...data]});
-                        console.log([...data]);
+                        io.sockets.emit('insert', data);
+                        console.log(data);
                     })
                     .catch(err => console.log(err));
                 break;
@@ -99,6 +114,3 @@ program()
 
 
 
-server.listen(4001, () => {
-    console.log('Server running on port 4001');
-})
