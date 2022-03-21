@@ -1,10 +1,14 @@
 //----------------MYSQL IMPORTS------------------------//
 const {database} = require('./config/helpers');
+const config = require('./config/databaseConfig');
 const mysql = require('mysql');
 const MySQLEvents = require('@rodrigogs/mysql-events');
 //-----------------------------------------------------//
 
-const app = require('express')();
+
+
+const app = require('express');
+const router = app.Router();
 const server = require('http').createServer(app);
 const io = require('socket.io')(server,
     {
@@ -20,7 +24,17 @@ io.on('connection', (socket) => {
 });
 
 
+
+const updateOrder = require("./actions/updateOrder");
+
+
+router.get("/", (req, res) => {
+    res.json({ response: "I am alive" }).status(200);
+  });
+
 server.listen(4001);
+
+
 
 
 
@@ -29,13 +43,7 @@ let data = Array(0);
 let currentData = Array(0);
 
 const program = async () => {
-  const connection = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: '',
-    database: 'test'
-  });
-
+  const connection= config.connection;
   const instance = new MySQLEvents(connection, {
     startAtEnd: true  // to record only new binary logs
 });
@@ -44,7 +52,7 @@ const program = async () => {
 
   instance.addTrigger({
     name: 'Monitor all SQL Statements',
-    expression: 'test.t', 
+    expression: 'tiolanches.wp_woocommerce_order_items', 
     statement: MySQLEvents.STATEMENTS.ALL,
     onEvent: e => {
         currentData = e.affectedRows;
@@ -86,9 +94,9 @@ const program = async () => {
                 break;
 
             case "INSERT":
-                database.table('t')
-                    .withFields(['id', 'a', 'b', 'c'])
-                    .sort({id: -1})
+                database.table('wp_woocommerce_order_items')
+                    .withFields(['order_item_id', 'order_item_name'])
+                    .sort({order_item_id: -1})
                     .getAll()
                     .then(prods => {
                         data = prods;

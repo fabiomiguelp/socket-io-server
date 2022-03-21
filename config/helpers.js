@@ -1,11 +1,11 @@
 let MySqli = require('mysqli');
 
 let conn = new MySqli({
-    host: '127.0.0.1',
+    host: 'localhost',
     post: '3306',
     user: 'root',
     passwd: '',
-    db: 'test'
+    db: 'tiolanches'
 });
 
 let db = conn.emit(false, '');
